@@ -1,0 +1,95 @@
+// Startup services
+spawn-at-startup "waybar"
+spawn-at-startup "copyq"
+
+// Default output states
+output "eDP-1" {
+    off
+}
+
+output "HDMI-A-1" {
+    mode "1920x1080@74.973"
+    scale 1.0
+    position x=0 y=0
+}
+
+// Layout baseline
+layout {
+    focus-ring {
+        width 3
+        active-color "#00ff00"
+        inactive-color "#00000000"
+    }
+    gaps 4
+    center-focused-column "never"
+    border {
+        off
+    }
+}
+
+// Window rules
+window-rule {
+    match app-id="^com\\.github\\.hluk\\.copyq$"
+    open-floating true
+    default-column-width { proportion 0.4; }
+}
+
+window-rule {
+    match app-id="org.kde.plasma.emojier"
+    open-floating true
+}
+
+// Keybindings
+binds {
+    // Custom Hardware & Scripts
+    Mod+Shift+D { spawn "/home/sep2025/.local/bin/niri-toggle-display"; }
+    Ctrl+Mod+Alt+Right { spawn "/home/sep2025/.local/bin/niri-rotate-screen" "cw"; }
+    Ctrl+Mod+Alt+Left { spawn "/home/sep2025/.local/bin/niri-rotate-screen" "ccw"; }
+    Mod+Period { spawn "plasma-emojier"; }
+    Mod+C { spawn "copyq" "toggle"; } 
+    
+    // Audio Controls
+    XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+    XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    
+    // Core Applications & Session
+    Mod+T { spawn "alacritty"; }
+    Mod+D { spawn "fuzzel"; }
+    Mod+E { spawn "env" "XDG_CURRENT_DESKTOP=KDE" "pcmanfm-qt"; }
+    Mod+Alt+L { spawn "swaylock"; }
+    Mod+Shift+E { quit; }
+    Mod+Shift+Slash { show-hotkey-overlay; }
+    Print { screenshot; }
+    
+    // Window & Column Management
+    Mod+Q { close-window; }
+    Mod+F { maximize-column; }
+    Mod+R { switch-preset-column-width; }
+    Mod+BracketLeft { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+    
+    // Floating State Management
+    Mod+V { toggle-window-floating; }
+    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+    
+    // Focus Navigation
+    Mod+Left { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Ctrl+Left { move-column-left; }
+    Mod+Ctrl+Right { move-column-right; }
+    
+    // Workspace Navigation
+    Mod+Page_Down { focus-workspace-down; }
+    Mod+Page_Up { focus-workspace-up; }
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up { move-column-to-workspace-up; }
+    
+    // Resizing & Sizing Controls
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+}
+spawn-at-startup "swaybg" "-i" "/home/sep2025/Pictures/WALLPAPERS/vintage uphill.png" "-m" "fill"
+prefer-no-csd

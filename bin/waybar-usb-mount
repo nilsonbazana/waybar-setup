@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+list_partitions() {
+    # Scan block devices in JSON format to inspect partitions vs whole unpartitioned drives
+    lsblk -p -J -o NAME,LABEL,SIZE,MOUNTPOINT,FSTYPE,TRAN,RM,HOTPLUG,TYPE | python3 -c '
+import sys, json
+
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+
+devices = data.get("blockdevices", [])
+
+def process_node(node, is_usb=False):
+    bus_usb = is_usb or (node.get("tran") == "usb") or (node.get("rm") is True) or (node.get("hotplug") is True)
+    children = node.get("children", [])
+    
+    # If the parent disk has children (partitions), ignore the parent container
+    if children:
+        for child in children:
+            process_node(child, is_usb=bus_usb)
+        return
+
+    # Only output if USB/removable and has a recognizable filesystem (exclude raw disks that contain partitions)
+    if bus_usb and node.get("type") in ("part", "disk"):
+        fstype = node.get("fstype")
+        if fstype and fstype != "swap":
+            name = node.get("name", "")
+            label = node.get("label") or name.split("/")[-1]
+            size = node.get("size", "")
+            mp = node.get("mountpoint")
+            
+            if mp:
+                desc = f"{label} ([Mounted: {mp}])"
+            else:
+                desc = f"{label} ([Not mounted - {size} {fstype}])"
+            print(name)
+            print(desc)
+
+for dev in devices:
+    process_node(dev)
+'
+}
+
+if [ "$1" = "--menu" ]; then
+    mapfile -t items < <(list_partitions)
+
+    if [ ${#items[@]} -eq 0 ]; then
+        kdialog --title "USB Drives" --msgbox "No external USB storage devices detected."
+        exit 0
+    fi
+
+    selected=$(kdialog --title "USB Storage Manager" --menu "Choose partition to mount or unmount:" "${items[@]}")
+
+    if [ -n "$selected" ]; then
+        mountpoint=$(lsblk -n -o MOUNTPOINT "$selected" | tr -d '[:space:]')
+        
+        if [ -n "$mountpoint" ]; then
+            err=$(udisksctl unmount -b "$selected" 2>&1)
+            if [ $? -eq 0 ]; then
+                notify-send "USB Storage" "Successfully unmounted $selected"
+            else
+                err_fallback=$(umount "$selected" 2>&1)
+                if [ $? -eq 0 ]; then
+                    notify-send "USB Storage" "Successfully unmounted $selected"
+                else
+                    kdialog --error "Failed to unmount $selected:\n\n$err\n$err_fallback"
+                fi
+            fi
+        else
+            out=$(udisksctl mount -b "$selected" 2>&1)
+            if [ $? -eq 0 ]; then
+                notify-send "USB Storage" "Mounted $selected:\n$out"
+            else
+                out_fallback=$(mount "$selected" 2>&1)
+                if [ $? -eq 0 ]; then
+                    notify-send "USB Storage" "Mounted $selected"
+                else
+                    kdialog --error "Failed to mount $selected:\n\n$out\n$out_fallback"
+                fi
+            fi
+        fi
+        
+        pkill -RTMIN+9 waybar 2>/dev/null
+    fi
+    exit 0
+fi
+
+mapfile -t partitions < <(list_partitions)
+count=0
+mounted_count=0
+tooltip_lines="<b>External USB Partitions:</b>\n"
+
+for ((i=0; i<${#partitions[@]}; i+=2)); do
+    count=$((count + 1))
+    dev="${partitions[i]}"
+    desc="${partitions[i+1]}"
+    if [[ "$desc" == *"[Mounted:"* ]]; then
+        mounted_count=$((mounted_count + 1))
+        tooltip_lines+="${dev}: <span color='#9ece6a'>${desc}</span>\n"
+    else
+        tooltip_lines+="${dev}: <span color='#f7768e'>${desc}</span>\n"
+    fi
+done
+
+if [ $count -eq 0 ]; then
+    echo '{"text": "<span color=\"#565f89\">🖴</span> ", "tooltip": "No external USB storage devices detected"}'
+else
+    tooltip_lines+="\n<i>Click to Mount / Unmount</i>"
+    if [ $mounted_count -gt 0 ]; then
+        echo "{\"text\": \"<span color=\\\"#73daca\\\">🖴 ${mounted_count}</span> \", \"tooltip\": \"${tooltip_lines}\"}"
+    else
+        echo "{\"text\": \"<span color=\\\"#e0af68\\\">🖴</span> \", \"tooltip\": \"${tooltip_lines}\"}"
+    fi
+fi

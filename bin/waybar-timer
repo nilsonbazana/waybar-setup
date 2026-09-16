@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+import sys, os, time, json, subprocess
+
+STATE_FILE = "/tmp/waybar_timer.json"
+
+def load_state():
+    if os.path.exists(STATE_FILE):
+        try:
+            with open(STATE_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"active": False, "target": 0, "notified": False}
+
+def save_state(state):
+    with open(STATE_FILE, "w") as f:
+        json.dump(state, f)
+
+if len(sys.argv) > 1 and sys.argv[1] == "--set":
+    res = subprocess.run(
+        ["kdialog", "--inputbox", "Timer duration in minutes:", "25"],
+        capture_output=True, text=True
+    )
+    val = res.stdout.strip()
+    if res.returncode == 0 and val:
+        try:
+            mins = float(val)
+            target = time.time() + mins * 60
+            save_state({"active": True, "target": target, "notified": False})
+        except ValueError:
+            pass
+    sys.exit(0)
+
+if len(sys.argv) > 1 and sys.argv[1] == "--reset":
+    save_state({"active": False, "target": 0, "notified": False})
+    sys.exit(0)
+
+state = load_state()
+if not state.get("active"):
+    print("⏱️ ")
+    sys.exit(0)
+
+rem = int(state.get("target", 0) - time.time())
+if rem <= 0:
+    if not state.get("notified"):
+        subprocess.run(["notify-send", "-u", "critical", "Timer Finished", "Time is up!"])
+        state["notified"] = True
+        save_state(state)
+    
+    # Auto-dismiss after 120 seconds (2 minutes)
+    if rem < -120:
+        save_state({"active": False, "target": 0, "notified": False})
+        print("⏱️ ")
+    else:
+        print("<span color='#f7768e'>🔔 Done!</span> ")
+else:
+    mins, secs = divmod(rem, 60)
+    print(f"<span color='#e0af68'>⏳ {mins:02d}:{secs:02d}</span> ")

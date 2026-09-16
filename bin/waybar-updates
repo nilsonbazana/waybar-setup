@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+import json, subprocess
+
+def check_updates():
+    # 1. Fast check via Ubuntu/Debian update-notifier
+    try:
+        res = subprocess.run(["/usr/lib/update-notifier/apt-check"], capture_output=True, text=True, timeout=5)
+        out = (res.stderr or res.stdout).strip()
+        if ";" in out:
+            total, security = [int(x) for x in out.split(";", 1)]
+            return total, security
+    except Exception:
+        pass
+
+    # 2. Fallback via apt list
+    try:
+        res = subprocess.run(
+            "apt list --upgradable 2>/dev/null | grep -v 'Listing...' | wc -l",
+            shell=True, capture_output=True, text=True, timeout=10
+        )
+        return int(res.stdout.strip() or 0), 0
+    except Exception:
+        return 0, 0
+
+total, sec = check_updates()
+
+if total > 0:
+    icon = f"<span color='#e0af68'>🔄 {total}</span> "
+    tooltip = (
+        f"<b>System Updates Available:</b> {total}\n"
+        f" • Security: {sec}\n"
+        f" • Packages: {total - sec}\n\n"
+        f"<i>Click to run full upgrade in Konsole</i>"
+    )
+else:
+    icon = "<span color='#9ece6a'>🔄</span> "
+    tooltip = "System is up to date.\n\n<i>Click to check repositories and upgrade</i>"
+
+print(json.dumps({"text": icon, "tooltip": tooltip}))

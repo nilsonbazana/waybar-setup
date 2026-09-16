@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+import json, os, glob
+
+# 1. CPU Usage calculation via /proc/stat
+stat_file = "/tmp/waybar_cpu_stat.json"
+prev_stat = []
+if os.path.exists(stat_file):
+    try:
+        with open(stat_file, "r") as f:
+            prev_stat = json.load(f)
+    except Exception:
+        pass
+
+curr_stat = []
+try:
+    with open("/proc/stat", "r") as f:
+        fields = f.readline().split()[1:]
+        curr_stat = [float(x) for x in fields]
+except Exception:
+    pass
+
+usage = 0
+if prev_stat and curr_stat and len(prev_stat) >= 4 and len(curr_stat) >= 4:
+    prev_idle = prev_stat[3] + (prev_stat[4] if len(prev_stat) > 4 else 0)
+    curr_idle = curr_stat[3] + (curr_stat[4] if len(curr_stat) > 4 else 0)
+    prev_total = sum(prev_stat)
+    curr_total = sum(curr_stat)
+    total_diff = curr_total - prev_total
+    idle_diff = curr_idle - prev_idle
+    if total_diff > 0:
+        usage = round(100.0 * (total_diff - idle_diff) / total_diff)
+        usage = max(0, min(100, usage))
+
+if curr_stat:
+    try:
+        with open(stat_file, "w") as f:
+            json.dump(curr_stat, f)
+    except Exception:
+        pass
+
+# 2. DTS Temperature (k10temp driver: Tctl/Tdie)
+dts_temp = None
+for hwmon in glob.glob("/sys/class/hwmon/hwmon*"):
+    name_file = os.path.join(hwmon, "name")
+    if os.path.exists(name_file):
+        try:
+            with open(name_file, "r") as f:
+                name = f.read().strip()
+            if name == "k10temp":
+                for t_input in glob.glob(os.path.join(hwmon, "temp*_input")):
+                    with open(t_input, "r") as f:
+                        dts_temp = float(f.read().strip()) / 1000.0
+                    break
+        except Exception:
+            pass
+    if dts_temp is not None:
+        break
+
+if dts_temp is None:
+    for t_input in glob.glob("/sys/class/hwmon/hwmon*/temp1_input"):
+        try:
+            with open(t_input, "r") as f:
+                dts_temp = float(f.read().strip()) / 1000.0
+                break
+        except Exception:
+            pass
+
+temp_str = f"{dts_temp:.1f}°C" if dts_temp is not None else "N/A"
+
+# 3. TDP / Power Draw
+tdp_str = "45W"
+power_w = None
+for p_file in glob.glob("/sys/class/hwmon/hwmon*/power1_input") + glob.glob("/sys/class/hwmon/hwmon*/power1_average"):
+    try:
+        with open(p_file, "r") as f:
+            power_w = float(f.read().strip()) / 1e6
+            break
+    except Exception:
+        pass
+
+if power_w is not None:
+    tdp_display = f"{power_w:.1f}W (Base TDP: {tdp_str})"
+else:
+    tdp_display = f"{tdp_str} (Nominal)"
+
+tooltip = (
+    f"<b>CPU: AMD Ryzen 5 4600H</b>\n"
+    f" • Usage: {usage}%\n"
+    f" • DTS Temp (Tctl): <span color='#00bfff'><b>{temp_str}</b></span>\n"
+    f" • TDP: <span color='#e0af68'><b>{tdp_display}</b></span>"
+)
+
+print(json.dumps({
+    "text": f"<span color='#00bfff'>{usage}%</span> ",
+    "tooltip": tooltip
+}))

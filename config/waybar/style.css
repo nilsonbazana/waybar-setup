@@ -1,0 +1,85 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "Noto Sans", "JetBrains Mono Nerd Font", sans-serif;
+    font-size: 16px;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: rgba(26, 27, 38, 0.70);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    color: #c0caf5;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    color: #565f89;
+    background: transparent;
+}
+
+#workspaces button.active {
+    color: #7aa2f7;
+    background-color: rgba(122, 162, 247, 0.25);
+    border-radius: 4px;
+}
+
+#memory,
+#cpu,
+#custom-gpu,
+#disk,
+#custom-sep1,
+#custom-sep2 {
+    padding: 0 1px;
+    margin: 2px 0;
+    background: transparent;
+    color: #c0caf5;
+}
+
+#clock {
+    padding: 0 4px;
+    font-weight: bold;
+}
+
+#custom-weather,
+#custom-astronomy,
+#pulseaudio,
+#tray {
+    padding: 0 6px;
+    margin: 2px 2px;
+    background-color: rgba(36, 40, 59, 0.60);
+    border-radius: 4px;
+}
+
+/* GTK Tooltip styling */
+tooltip {
+    background-color: #1a1b26;
+    border: 1px solid #7aa2f7;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+tooltip label {
+    color: #c0caf5;
+    font-size: 13px;
+}
+
+#memory {
+    margin-right: 8px;
+}
+
+#custom-cpu,
+#custom-gpu {
+    min-width: 48px;
+    font-feature-settings: "tnum";
+}
+
+#custom-gpu {
+    margin-right: 0px;
+    padding-right: 0px;
+}
+
+#memory {
+    color: #ff66cc;
+    font-feature-settings: "tnum";
+}

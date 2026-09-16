@@ -1,0 +1,230 @@
+{
+    "output": "HDMI-A-1",
+    "layer": "top",
+    "position": "top",
+    "margin-top": 0,
+    "margin-bottom": 0,
+    "modules-left": [
+        "custom/sky-status",
+        "custom/sep0",
+        "niri/workspaces",
+        "niri/window"
+    ],
+    "modules-center": [
+        "clock"
+    ],
+    "modules-right": [
+        "custom/updates",
+        "custom/usb",
+        "custom/sep-updates",
+        "memory",
+        "custom/cpu",
+        "custom/gpu",
+        "custom/sep1",
+        "disk#root",
+        "disk#ssddata",
+        "custom/sep2",
+        "disk#shared",
+        "custom/sep-diamond",
+        "disk#data",
+        "custom/sep3",
+        "disk#toshiba",
+        "pulseaudio",
+        "network",
+        "custom/colorpicker",
+        "custom/timer",
+        "tray"
+    ],
+
+    "custom/updates": {
+        "exec": "$HOME/.local/bin/waybar-updates",
+        "return-type": "json",
+        "interval": 1800,
+        "signal": 8,
+        "format": "{}",
+        "on-click": "konsole -e bash -c 'sudo apt update && sudo apt upgrade; pkill -RTMIN+8 waybar 2>/dev/null; echo; read -p \"Press Enter to exit...\" dummy'",
+        "tooltip": true
+    },
+
+    "custom/sep-updates": {
+        "format": "🔹 ",
+        "interval": "once",
+        "tooltip": false
+    },
+
+    "custom/sky-status": {
+        "exec": "$HOME/.local/bin/sky-status-bar",
+        "return-type": "json",
+        "interval": 300,
+        "format": "{}",
+        "on-click": "notify-send -t 10000 'Astronomy Status' \"$($HOME/.local/bin/sky-status)\"",
+        "tooltip": true
+    },
+
+    "custom/sep0": {
+        "format": "| ",
+        "interval": "once",
+        "tooltip": false
+    },
+
+    "clock": {
+        "interval": 1,
+        "format": "<span color='#ffff00'>{:%a, %e %b %Y  %H:%M:%S}</span>",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "weeks-pos": "right",
+            "on-scroll": 1,
+            "format": {
+                "months": "<span color='#ffead3'><b>{}</b></span>",
+                "days": "<span color='#ecc6d9'><b>{}</b></span>",
+                "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+                "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+                "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+            }
+        },
+        "on-click": "kdialog --calendar 'Calendar' >/dev/null 2>&1 &"
+    },
+
+    "memory": {
+        "interval": 5,
+        "format": "<span color='#ff66cc'>{used:0.1f} [{percentage:3d}%]</span>",
+        "tooltip": true,
+        "tooltip-format": "RAM: {used:0.1f}GiB used / {total:0.1f}GiB ({percentage}% used)
+Free: {avail:0.1f}GiB"
+    },
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    "custom/cpu": {
+        "exec": "$HOME/.local/bin/waybar-cpu-status",
+        "return-type": "json",
+        "interval": 2,
+        "format": "{}",
+        "on-click": "$HOME/.local/bin/waybar-cpu-status --notify",
+        "tooltip": true
+    },
+
+    "custom/gpu": {
+        "exec": "$HOME/.local/bin/waybar-gpu-status",
+        "return-type": "json",
+        "interval": 2,
+        "format": "{}",
+        "on-click": "$HOME/.local/bin/waybar-gpu-status --notify",
+        "tooltip": true
+    },
+
+    "custom/sep1": {
+        "format": " | ",
+        "interval": "once",
+        "tooltip": false
+    },
+
+    "disk#root": {
+        "interval": 30,
+        "path": "/",
+        "format": "<span color='#bb9af7'>{free}</span> ",
+        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+    },
+
+    "disk#ssddata": {
+        "interval": 30,
+        "path": "/mnt/SSDdata",
+        "format": "<span color='#bb9af7'>{free}</span> ",
+        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+    },
+
+    "custom/sep2": {
+        "format": "| ",
+        "interval": "once",
+        "tooltip": false
+    },
+
+    "disk#shared": {
+        "interval": 30,
+        "path": "/mnt/shared",
+        "format": "<span color='#7dcfff'>{free}</span> ",
+        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+    },
+
+    "custom/sep-diamond": {
+        "format": "🔹 ",
+        "interval": "once",
+        "tooltip": false
+    },
+
+    "disk#data": {
+        "interval": 30,
+        "path": "/mnt/data",
+        "format": "<span color='#7dcfff'>{free}</span> ",
+        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+    },
+
+    "custom/sep3": {
+        "format": "<span color='#7dcfff'>| </span>",
+        "interval": "once",
+        "tooltip": false
+    },
+
+    "disk#toshiba": {
+        "interval": 30,
+        "path": "/media/sep2025/2TB_Toshiba",
+        "format": "<span color='#9ece6a'>{free}</span> ",
+        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+    },
+
+    
+    "custom/usb": {
+        "exec": "$HOME/.local/bin/waybar-usb-mount",
+        "return-type": "json",
+        "interval": 5,
+        "signal": 9,
+        "format": "{}",
+        "on-click": "$HOME/.local/bin/waybar-usb-mount --menu",
+        "tooltip": true
+    },
+    "pulseaudio": {
+        "format": "🔊 {volume}% ",
+        "format-muted": "<span color='#f7768e'>🔇 MUTED</span> ",
+        "on-click": "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+    },
+
+    "network": {
+        "format-wifi": "📶 <span color='#ffffff'>{signalStrength}%</span> ",
+        "format-ethernet": "󰈀 <span color='#ffffff'>ETH</span> ",
+        "format-disconnected": "󰤭 <span color='#ffffff'>OFF</span> ",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+        "interval": 5
+    },
+
+    "custom/colorpicker": {
+        "format": "🎨 ",
+        "on-click": "kcolorchooser",
+        "tooltip": false
+    },
+
+    "custom/timer": {
+        "exec": "$HOME/.local/bin/waybar-timer",
+        "interval": 1,
+        "format": "{}",
+        "on-click": "$HOME/.local/bin/waybar-timer --set",
+        "on-click-right": "$HOME/.local/bin/waybar-timer --reset",
+        "tooltip": false
+    }
+}

@@ -21,13 +21,13 @@
         "custom/cpu",
         "custom/gpu",
         "custom/sep1",
-        "disk#root",
+        "custom/disk-root",
         "custom/sep2",
-        "disk#shared",
+        "custom/disk-shared",
         "custom/sep-diamond",
-        "disk#data",
+        "custom/disk-data",
         "custom/sep3",
-        "disk#toshiba",
+        "custom/disk-toshiba",
         "pulseaudio",
         "network",
         "custom/colorpicker",
@@ -134,18 +134,11 @@ Free: {avail:0.1f}GiB"
         "tooltip": false
     },
 
-    "disk#root": {
+    "custom/disk-root": {
+        "exec": "$HOME/.local/bin/waybar-disks root",
         "interval": 30,
-        "path": "/",
-        "format": "<span color='#bb9af7'>{free}</span> ",
-        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
-    },
-
-    "disk#ssddata": {
-        "interval": 30,
-        "path": "/mnt/SSDdata",
-        "format": "<span color='#bb9af7'>{free}</span> ",
-        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+        "format": "{}",
+        "tooltip": false
     },
 
     "custom/sep2": {
@@ -154,24 +147,24 @@ Free: {avail:0.1f}GiB"
         "tooltip": false
     },
 
-    "disk#shared": {
+    "custom/disk-shared": {
+        "exec": "$HOME/.local/bin/waybar-disks shared",
         "interval": 30,
-        "path": "/mnt/shared",
-        "format": "<span color='#7dcfff'>{free}</span> ",
-        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+        "format": "{}",
+        "tooltip": false
     },
 
     "custom/sep-diamond": {
-        "format": "🔹 ",
+        "format": "—",
         "interval": "once",
         "tooltip": false
     },
 
-    "disk#data": {
+    "custom/disk-data": {
+        "exec": "$HOME/.local/bin/waybar-disks data",
         "interval": 30,
-        "path": "/mnt/data",
-        "format": "<span color='#7dcfff'>{free}</span> ",
-        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+        "format": "{}",
+        "tooltip": false
     },
 
     "custom/sep3": {
@@ -180,14 +173,13 @@ Free: {avail:0.1f}GiB"
         "tooltip": false
     },
 
-    "disk#toshiba": {
+    "custom/disk-toshiba": {
+        "exec": "$HOME/.local/bin/waybar-disks toshiba",
         "interval": 30,
-        "path": "/media/sep2025/2TB_Toshiba",
-        "format": "<span color='#9ece6a'>{free}</span> ",
-        "tooltip-format": "{used} / {total} on {path} ({percentage_used}%)"
+        "format": "{}",
+        "tooltip": false
     },
 
-    
     "custom/usb": {
         "exec": "$HOME/.local/bin/waybar-usb-mount",
         "return-type": "json",

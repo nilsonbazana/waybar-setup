@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+target="$1"
+
+case "$target" in
+    root)
+        val=$(df -BG / 2>/dev/null | awk 'NR==2 {print $4}')
+        echo "<span color='#bb9af7'>${val}</span> "
+        ;;
+    shared)
+        val=$(df -BG /mnt/shared 2>/dev/null | awk 'NR==2 {print $4}')
+        [ -n "$val" ] && echo -n "<span color='#7dcfff'>${val}</span>"
+        ;;
+    data)
+        val=$(df -BG /mnt/data 2>/dev/null | awk 'NR==2 {print $4}')
+        [ -n "$val" ] && echo "<span color='#7dcfff'>${val}</span> "
+        ;;
+    toshiba)
+        if mountpoint -q /media/sep2025/2TB_Toshiba; then
+            val=$(df -BG /media/sep2025/2TB_Toshiba 2>/dev/null | awk 'NR==2 {print $4}')
+            echo "<span color='#9ece6a'>${val}</span> "
+        fi
+        ;;
+esac

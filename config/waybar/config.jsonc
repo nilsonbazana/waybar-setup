@@ -137,9 +137,9 @@ Free: {avail:0.1f}GiB"
     "custom/disk-root": {
         "exec": "$HOME/.local/bin/waybar-disks root",
         "interval": 30,
-        "format": "{}",
-        "tooltip": false
-    },
+        "return-type": "json",
+        "format": "{}"
+        },
 
     "custom/sep2": {
         "format": "| ",
@@ -150,9 +150,9 @@ Free: {avail:0.1f}GiB"
     "custom/disk-shared": {
         "exec": "$HOME/.local/bin/waybar-disks shared",
         "interval": 30,
-        "format": "{}",
-        "tooltip": false
-    },
+        "return-type": "json",
+        "format": "{}"
+        },
 
     "custom/sep-diamond": {
         "format": "—",
@@ -163,9 +163,9 @@ Free: {avail:0.1f}GiB"
     "custom/disk-data": {
         "exec": "$HOME/.local/bin/waybar-disks data",
         "interval": 30,
-        "format": "{}",
-        "tooltip": false
-    },
+        "return-type": "json",
+        "format": "{}"
+        },
 
     "custom/sep3": {
         "format": "<span color='#7dcfff'>| </span>",
@@ -176,9 +176,9 @@ Free: {avail:0.1f}GiB"
     "custom/disk-toshiba": {
         "exec": "$HOME/.local/bin/waybar-disks toshiba",
         "interval": 30,
-        "format": "{}",
-        "tooltip": false
-    },
+        "return-type": "json",
+        "format": "{}"
+        },
 
     "custom/usb": {
         "exec": "$HOME/.local/bin/waybar-usb-mount",
@@ -206,8 +206,9 @@ Free: {avail:0.1f}GiB"
 
     "custom/colorpicker": {
         "format": "🎨 ",
-        "on-click": "kcolorchooser",
-        "tooltip": false
+        "tooltip": true,
+        "tooltip-format": "Pick color under cursor",
+        "on-click": "$HOME/.local/bin/waybar-colorpicker"
     },
 
     "custom/timer": {

@@ -1,0 +1,5 @@
+
+# Google Calendar credentials and runtime cache
+feed.url
+*-state.json
+gcal_feed.ics

@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+URL_FILE="$HOME/.config/gcal-notifier/feed.url"
+CACHE_FILE="$HOME/.cache/gcal-notifier-state.json"
+ICS_TMP="/tmp/gcal_feed.ics"
+
+if [ ! -f "$URL_FILE" ]; then
+    exit 0
+fi
+
+FEED_URL="$(head -n 1 "$URL_FILE" | tr -d '[:space:]')"
+if [ -z "$FEED_URL" ]; then
+    exit 0
+fi
+
+# Download fresh feed (timeout after 10 seconds)
+curl -sSf -m 10 "$FEED_URL" -o "$ICS_TMP" || exit 0
+
+python3 - << 'PYEOF'
+import os
+import json
+import datetime
+from dateutil import tz
+from icalendar import Calendar
+
+ICS_PATH = "/tmp/gcal_feed.ics"
+CACHE_PATH = os.path.expanduser("~/.cache/gcal-notifier-state.json")
+WINDOW_MINUTES = 15
+
+if not os.path.exists(ICS_PATH):
+    exit(0)
+
+state = {}
+if os.path.exists(CACHE_PATH):
+    try:
+        with open(CACHE_PATH, "r") as f:
+            state = json.load(f)
+    except Exception:
+        state = {}
+
+now = datetime.datetime.now(datetime.timezone.utc)
+horizon = now + datetime.timedelta(minutes=WINDOW_MINUTES)
+
+cutoff = (now - datetime.timedelta(hours=24)).isoformat()
+state = {k: v for k, v in state.items() if v > cutoff}
+
+with open(ICS_PATH, "rb") as f:
+    cal = Calendar.from_ical(f.read())
+
+for event in cal.walk("VEVENT"):
+    dtstart = event.get("DTSTART")
+    if not dtstart:
+        continue
+
+    val = dtstart.dt
+
+    if not isinstance(val, datetime.datetime):
+        continue
+
+    if val.tzinfo is None:
+        val = val.replace(tzinfo=datetime.timezone.utc)
+    else:
+        val = val.astimezone(datetime.timezone.utc)
+
+    if now <= val <= horizon:
+        uid = str(event.get("UID", ""))
+        event_key = f"{uid}_{val.isoformat()}"
+
+        if event_key in state:
+            continue
+
+        summary = str(event.get("SUMMARY", "Calendar Event"))
+        location = str(event.get("LOCATION", ""))
+
+        local_time = val.astimezone(tz.tzlocal()).strftime("%H:%M")
+        minutes_left = max(1, int((val - now).total_seconds() // 60))
+
+        body = f"Starts at {local_time} (in {minutes_left} min)"
+        if location:
+            body += f"\nLocation: {location}"
+
+        os.system(f'notify-send -u normal -a "Google Calendar" -i "appointment-soon" "{summary}" "{body}"')
+        
+        # Play audio chime asynchronously
+        sound_path = "/usr/share/sounds/freedesktop/stereo/message.oga"
+        if os.path.exists(sound_path):
+            os.system(f'canberra-gtk-play -i message >/dev/null 2>&1 || pw-play {sound_path} >/dev/null 2>&1 || paplay {sound_path} >/dev/null 2>&1 &')
+
+        state[event_key] = val.isoformat()
+
+os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
+with open(CACHE_PATH, "w") as f:
+    json.dump(state, f)
+PYEOF
+
+rm -f "$ICS_TMP"

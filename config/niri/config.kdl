@@ -1,6 +1,6 @@
 // Startup services
-spawn-at-startup "waybar"
-spawn-at-startup "copyq"
+spawn-at-startup "/home/sep2025/.local/bin/niri-launch-waybar"
+spawn-at-startup "wl-paste" "--watch" "copyq" "write" "text/plain" "-"
 
 // Default output states
 output "eDP-1" {
@@ -27,7 +27,8 @@ layout {
     }
 }
 
-// Window rules
+
+// Window Rules
 window-rule {
     match app-id="^com\\.github\\.hluk\\.copyq$"
     open-floating true
@@ -39,57 +40,119 @@ window-rule {
     open-floating true
 }
 
+window-rule {
+    match app-id="^thunar$"
+    open-floating true
+    default-column-width { proportion 0.6; }
+}
+
 // Keybindings
 binds {
-    // Custom Hardware & Scripts
+    // Custom Application Launchers (Super+1 to Super+0)
+    Mod+1 { spawn "google-chrome"; }
+    Mod+2 { spawn "kcalc"; }
+    Mod+3 { spawn "env" "QT_QPA_PLATFORM=xcb" "/opt/XnView/xnview.sh"; }
+    Mod+4 { spawn "VBoxManage" "startvm" "Win7"; }
+    Mod+5 { spawn "firefox"; }
+    Mod+6 { spawn "okular"; }
+    Mod+7 { spawn "deluge"; }
+    Mod+8 { spawn "flatpak" "run" "org.fooyin.fooyin"; }
+    Mod+9 { spawn "easyeffects"; }
+    Mod+0 { spawn "cryptomator"; }
+
+    // Display, Rotation & CopyQ Shortcuts
+    Mod+C { spawn "copyq" "toggle"; }
     Mod+Shift+D { spawn "/home/sep2025/.local/bin/niri-toggle-display"; }
     Ctrl+Mod+Alt+Right { spawn "/home/sep2025/.local/bin/niri-rotate-screen" "cw"; }
     Ctrl+Mod+Alt+Left { spawn "/home/sep2025/.local/bin/niri-rotate-screen" "ccw"; }
-    Mod+Period { spawn "plasma-emojier"; }
-    Mod+C { spawn "copyq" "toggle"; } 
-    
-    // Audio Controls
-    XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
-    XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
-    XF86AudioMute { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-    
-    // Core Applications & Session
-    Mod+T { spawn "alacritty"; }
-    Mod+D { spawn "fuzzel"; }
-    Mod+E { spawn "env" "XDG_CURRENT_DESKTOP=KDE" "pcmanfm-qt"; }
-    Mod+Alt+L { spawn "swaylock"; }
-    Mod+Shift+E { quit; }
-    Mod+Shift+Slash { show-hotkey-overlay; }
-    Print { screenshot; }
-    
-    // Window & Column Management
-    Mod+Q { close-window; }
-    Mod+F { maximize-column; }
-    Mod+R { switch-preset-column-width; }
-    Mod+BracketLeft { consume-or-expel-window-left; }
-    Mod+BracketRight { consume-or-expel-window-right; }
-    
-    // Floating State Management
-    Mod+V { toggle-window-floating; }
-    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
-    
-    // Focus Navigation
+
+    // Overview, Column Ends & Core Navigation
+    Mod+O { toggle-overview; }
+    Mod+Home { focus-column-first; }
+    Mod+End { focus-column-last; }
+    Ctrl+Mod+Home { move-column-to-first; }
+    Ctrl+Mod+End { move-column-to-last; }
     Mod+Left { focus-column-left; }
     Mod+Right { focus-column-right; }
+    Mod+Down { focus-window-down; }
+    Mod+Up { focus-window-up; }
     Mod+Ctrl+Left { move-column-left; }
     Mod+Ctrl+Right { move-column-right; }
-    
-    // Workspace Navigation
     Mod+Page_Down { focus-workspace-down; }
     Mod+Page_Up { focus-workspace-up; }
     Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
     Mod+Ctrl+Page_Up { move-column-to-workspace-up; }
-    
-    // Resizing & Sizing Controls
+    Mod+BracketLeft { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+    // Keys & Overlays
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // Launchers & Applications
+    Mod+Return { spawn "konsole"; }
+    Mod+D { spawn "fuzzel"; }
+    Mod+E { spawn "thunar"; }
+    Mod+Shift+V { spawn "env" "QT_QPA_PLATFORM=xcb" "copyq" "toggle"; }
+    Mod+Period { spawn "plasma-emojier"; }
+
+    // Display Management Scripts
+
+    // Hardware Controls
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "set" "+5%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+
+    // Window Management
+    Mod+Q { close-window; }
+
+    // Focus Navigation
+    Mod+H     { focus-column-left; }
+    Mod+J     { focus-window-down; }
+    Mod+K     { focus-window-up; }
+    Mod+L     { focus-column-right; }
+
+    // Move Windows & Columns
+    Mod+Ctrl+Down  { move-window-down; }
+    Mod+Ctrl+Up    { move-window-up; }
+    Mod+Ctrl+H     { move-column-left; }
+    Mod+Ctrl+J     { move-window-down; }
+    Mod+Ctrl+K     { move-window-up; }
+    Mod+Ctrl+L     { move-column-right; }
+
+    // Column Positioning
+
+    // Workspaces
+    Mod+U              { focus-workspace-down; }
+    Mod+I              { focus-workspace-up; }
+    Mod+Ctrl+U         { move-column-to-workspace-down; }
+    Mod+Ctrl+I         { move-column-to-workspace-up; }
+
+    Mod+Shift+Page_Down { move-workspace-down; }
+    Mod+Shift+Page_Up   { move-workspace-up; }
+    Mod+Shift+U         { move-workspace-down; }
+    Mod+Shift+I         { move-workspace-up; }
+
+
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+    Mod+Ctrl+5 { move-column-to-workspace 5; }
+    Mod+Ctrl+6 { move-column-to-workspace 6; }
+    Mod+Ctrl+7 { move-column-to-workspace 7; }
+    Mod+Ctrl+8 { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+    // Layout Sizing & Geometry
+    Mod+R { switch-preset-column-width; }
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+V { toggle-window-floating; }
+
     Mod+Minus { set-column-width "-10%"; }
     Mod+Equal { set-column-width "+10%"; }
-    Mod+Shift+Minus { set-window-height "-10%"; }
-    Mod+Shift+Equal { set-window-height "+10%"; }
+
+    // Session Management
+    Mod+Shift+P { power-off-monitors; }
 }
-spawn-at-startup "swaybg" "-i" "/home/sep2025/Pictures/WALLPAPERS/vintage uphill.png" "-m" "fill"
-prefer-no-csd
